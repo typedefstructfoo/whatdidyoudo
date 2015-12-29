@@ -12,11 +12,6 @@ struct wdud
  
 wdud this_time;
 
-void print(char *s)
-{
-	printf("%s\n", s);
-}
-
 char* rnl(char *s)
 {
 	char *t = s;
@@ -26,6 +21,56 @@ char* rnl(char *s)
 	}
 	*s = '\0';
 	return t;
+}
+
+int slen(char *s)
+{
+	int c = 0;
+	while(*s++) c++;
+	return c;
+}
+
+int find_word(char *s, char *w)
+{
+	int wlen = slen(w);
+	int j = 0;
+	int result = -1;
+	for(int i=0;s[i] != '\0'; i++)
+	{
+		if(s[i] == w[j])
+		{
+			j++;
+		}else
+		{
+			j = 0;
+		}
+
+		if(j == wlen)
+		{
+			result = i-j+1;
+			break;
+		}
+	}
+	return result;
+}
+
+void print_with_colors(char *s)
+{
+	int pos  = find_word(s, "TODO");
+	int wlen = slen("TODO"); 
+	for(int i=0;s[i] != '\0'; i++)
+	{
+		if(pos >= 0)			
+		{
+			if(pos == i)			
+				printf("\x1b[31;103;1m");
+
+			if(pos+wlen == i)
+				printf("\x1b[0m");
+		}
+		printf("%c", s[i]);
+	}
+	
 }
 
 void initialize()
@@ -41,7 +86,8 @@ void initialize()
 			wdud *tmp = (wdud *)buf;
 			time_t time_info = tmp->rawtime;
 			//todo use sprintf or something..
-			printf("%s: %s", rnl(ctime(&tmp->rawtime)), tmp->input_buffer);
+			printf("%s: ", rnl(ctime(&tmp->rawtime)));
+			print_with_colors(tmp->input_buffer);
 		}
 		fclose(file_pointer);
 	}
@@ -61,7 +107,7 @@ void getinput()
 	tm *timeinfo;
 
 	time(&rawtime);
-	print("What did you do?");
+	printf("What did you do?\n");
 	fgets(this_time.input_buffer, CONTENT_SIZE, stdin);
 	
 	timeinfo = localtime(&rawtime);
